@@ -1,209 +1,123 @@
-# SP All Write — Adobe Illustrator Script to Output Font Glyphs
+# Glyphsetter
 
-![SP All Write — cover](assets/01.jpg)
+Every glyph a font really has, set on the artboard. A script for Adobe Illustrator.
 
-**SP All Write 1.0.jsx** is an ExtendScript for Adobe Illustrator that builds a text object containing the glyphs your font **actually renders** in Illustrator. It’s designed for type designers and graphic designers who need a fast “what’s inside this font?” view прямо на артборде — без ручной выгрузки и без мусора из неподдерживаемых символов.
+[Русская версия](README.ru.md)
 
-The script is intentionally pragmatic: it starts from an explicit **“golden” default set** (digits, Latin, Cyrillic, punctuation/signs), then optionally adds extra Unicode blocks. After placing characters, it filters out anything that Illustrator renders with a fallback font (tofu / missing glyphs), so the output contains only real glyphs from the chosen font.
+![Glyphsetter](assets/01-cover.png)
 
----
+Glyphsetter (formerly **SP All Write**) is a free ExtendScript for Adobe
+Illustrator. Pick a font, and the script builds a text object with the glyphs
+the font **actually renders** in Illustrator: digits, Latin, Cyrillic,
+punctuation and any extra Unicode blocks you choose. Characters that
+Illustrator would draw with a fallback font (tofu, missing glyphs) are left
+out, so the specimen shows only what is really in the font. A report lists the
+glyph count, the glyphs themselves and, with the optional module, the
+languages the font supports.
 
-## Key features
+It is made for type designers and graphic designers who need a quick answer
+to "what's inside this font?" right on the artboard.
 
-### 1) Golden default set (explicit lists, not broad ranges)
+## What it does
 
-Enabled by default:
+- **A reliable default set.** Digits, Latin, Cyrillic and punctuation & signs
+  (with typographic punctuation and currency signs) are explicit, hand-picked
+  lists, not broad Unicode ranges, so a basic specimen never scans half of
+  Unicode.
+- **Extra blocks on demand.** Under **Additional ▸**: Extended Latin, Extended
+  Cyrillic, Symbols & Signs (including combining marks), Historical, Armenian,
+  Greek, Georgian, Semitic (Hebrew, Arabic and related), Tibetan, Southeast
+  Asian, Ethiopic, Japanese.
+- **Only real glyphs.** After placing the candidates, the script removes every
+  character Illustrator renders with a fallback font.
+- **No fake accents.** In display fonts with limited coverage, precomposed
+  Latin letters are sometimes just the base letter. The script compares width,
+  outline bounds and, for tricky letters such as Ł, Ø, Đ, the point count, and
+  skips such duplicates.
+- **No pointless case repetition.** If a font has only capitals or only
+  lowercase, or both cases look the same, the duplicates are dropped.
+- **Two output modes.** A point text object near the top left of the view, or
+  an area text box filling the view; in area mode the largest point size that
+  still fits is found automatically.
+- **Report.** Font name and PostScript name, glyph count, the glyph string and
+  (optionally) the supported languages. **Copy** puts it on the clipboard,
+  **Save** writes a `.txt` file.
 
-- **Digits**
-- **Latin**
-- **Cyrillic**
-- **Punctuation & signs** (incl. common typographic punctuation + currency signs)
+![The Glyphsetter dialog](assets/02-dialog.jpg)
 
-This “golden set” is hand-picked and stable, so you don’t accidentally scan half of Unicode when you only need a reliable baseline specimen.
-
-### 2) Optional blocks (toggle in UI)
-
-Additional checkboxes include:
-
-- **Extended Latin** (everything beyond the golden Latin set; added as “extra” via set-diff)
-- **Extended Cyrillic** (everything beyond the golden Cyrillic set; added as “extra” via set-diff)
-- **Symbols & Signs** (includes combining marks + wide symbol ranges + extra digits/punctuation outside the golden set)
-- **Historical**
-- **Armenian**
-- **Greek**
-- **Georgian**
-- **Semitic** (Hebrew + Arabic + related ranges)
-- **Tibetan**
-- **Southeast Asian**
-- **Ethiopic**
-- **Japanese**
-
-> **Note:** non-BMP code points are disabled by default for stability in Illustrator (some non-BMP ranges may be listed but won’t be scanned unless you explicitly change that in code).
-
-### 3) “Only real glyphs” output (no tofu)
-
-The script places candidate characters, then removes anything that Illustrator displays with a fallback font. Result: your text frame contains only glyphs that exist in the selected font.
-
-### 4) Smart de-duplication for Latin diacritics
-
-For precomposed Latin letters, the script can skip “fake” variants that are visually identical to the base letter (common in display fonts with limited coverage).
-
-The logic is three-stage (fast → precise):
-
-1. Width check (very fast)
-2. Outline bounds check (height/width)
-3. Point-count check for a small set of tricky cases (Ł/Ø/Đ/etc.)
-
-### 5) Case policy (avoids pointless upper/lower repetition)
-
-If the font has only uppercase or only lowercase (or if they are visually identical), the script can reduce duplication to keep output cleaner.
-
-### 6) Two output modes
-
-- **Point text object:** placed near the top-left of the current viewport.
-- **Area text (viewport):** creates a large area text box centered in the current view.
-
-### 7) Auto-fit font size (Area Text mode)
-
-In Area Text mode, the script automatically finds the largest font size that does not overset (binary search + overset detection).
-
-### 8) Optional language detection (via module)
-
-If enabled, the script can show a list of supported languages in the final report — but only if an external module is present (see below).
-
-### 9) Results report + copy/save
-
-After generation, a dialog shows:
-
-- display name + PostScript name
-- total glyph count
-- the final glyph string
-- (optionally) detected languages
-
-You can **Copy** to clipboard or **Save** the report to a `.txt` file.
-
----
+![The report: glyph count, the glyphs and the supported languages](assets/03-report.jpg)
 
 ## Installation
 
-### Option A — Install permanently (recommended)
+Download `Glyphsetter.jsx` (and, for the language list, `Glyphsetter Languages.jsx`)
+and copy them into Illustrator's Scripts folder:
 
-Copy the `.jsx` file into Illustrator’s Scripts folder:
+- **macOS:** `Applications/Adobe Illustrator <version>/Presets/<language>/Scripts/`
+  (for example `en_US` or `ru_RU`)
+- **Windows:** `C:\Program Files\Adobe\Adobe Illustrator <version>\Presets\<language>\Scripts\`
 
-**macOS**
-
-- `Applications/Adobe Illustrator <version>/Presets/en_US/Scripts/`
-- or `.../Presets/ru_RU/Scripts/`
-
-**Windows**
-
-- `C:\Program Files\Adobe\Adobe Illustrator <version>\Presets\en_US\Scripts\`
-- or `...\Presets\ru_RU\Scripts\`
-
-Restart Illustrator. Then run via:
-
-- **File → Scripts → SP All Write 1.0**
-
-### Option B — Run once
-
-- **File → Scripts → Other Script…** and select the `.jsx` file.
-
----
+Restart Illustrator and run **File → Scripts → Glyphsetter**. To try it once
+without installing, use **File → Scripts → Other Script…** and pick
+`Glyphsetter.jsx`.
 
 ## Usage
 
-Run the script via **File → Scripts → SP All Write** (or “Other Script…”).  
-A dialog will appear where you select the font, output mode, and character sets.
+1. Open any document.
+2. Run **File → Scripts → Glyphsetter**.
+3. Pick a font: type to filter the list, double-click a font to choose it.
+4. Choose the output: point or area text, groups separated by paragraphs or
+   not, show languages or not.
+5. Keep the default set or open **Additional ▸** for more blocks.
+6. Press **OK**. The text frame is named `AllGlyphs_<PostScriptName>`, and the
+   report opens.
 
-![SP All Write — dialog](assets/02.jpg)
+The interface is in Russian when Illustrator runs in Russian and in English
+otherwise.
 
-1. Open any Illustrator document.
-2. Run **File → Scripts → SP All Write** (or “Other Script…”).
-3. Pick a font:
-   - start typing to filter the list
-   - double-click a font to select quickly
-4. Choose output options:
-   - Point text or Area text
-   - Separate into groups (paragraph breaks between selected sets)
-   - Show languages (requires module)
-5. Select glyph sets:
-   - default golden set is enabled
-   - open **Additional ▸** for optional blocks
-6. Click **OK**.
-7. The script creates a text frame named:
-   - `AllGlyphs_<PostScriptName>`
+## Language list (optional)
 
----
+`Glyphsetter Languages.jsx` adds the list of languages the font covers to the
+report. The main script looks for it next to itself, then in Illustrator's
+Scripts folder (`ru_RU`, then `en_US`). The module's old name,
+`SP lang All Write.jsx`, is still recognised. If **Show languages** is on and
+the module is missing, the script says so and goes on without the list.
 
-## Results report
+## Safe mode
 
-After generation, you’ll get a report window where you can review the glyph string and **copy** or **save** the report.
-
-![SP All Write — report](assets/03.jpg)
-
----
-
-## Optional: Language detection module
-
-The main script tries to load a companion file:
-
-- `SP lang All Write.jsx`
-
-It searches:
-
-1. next to the main script, or  
-2. inside Illustrator’s Scripts folder (ru_RU first, then en_US)
-
-If found, it expects a global function:
-
-- `detectLanguagesFromGlyphs(glyphsPresent)`
-
-If you enable **“Show languages”** but the module is missing, the script will warn you and continue without language output.
-
-Example of the language list in the report (when the module is installed):
-
-![SP All Write — languages list](assets/04.jpg)
-
----
-
-## Safe Mode (compatibility fallback)
-
-The script runs a pre-flight compatibility check. If it detects a risky environment, it enables Safe Mode, which reduces features that can be unstable in some Illustrator/OS combinations.
-
-In Safe Mode you’ll typically see:
-
-- scatter-scan optimizations disabled
-- “Enable all” removed
-- optional selections limited (to keep processing predictable)
-
----
+Before the dialog opens, the script checks the environment. If something looks
+risky for the Illustrator and system versions in use, it switches to safe mode:
+faster scanning shortcuts are off, **Enable all** is hidden and the number of
+extra blocks is limited, so the run stays predictable.
 
 ## Examples
 
-### Large Unicode font example
-![SP All Write — Stepovik example](assets/05.jpg)
+Stepovik SP Bold — Latin, Cyrillic and extended sets:
 
-### Display font example
-![SP All Write — Noto Sans example](assets/06.jpg)
+![Stepovik SP Bold specimen](assets/04-specimen-stepovik.png)
 
----
+Razluka SP Bold — a display font with capitals only, so the lowercase is not repeated:
 
-## Limitations (by design)
+![Razluka SP Bold specimen](assets/05-specimen-razluka.png)
 
-- **Unicode-only output.** Glyphs without Unicode code points (stylistic alternates, swashes via OT features, unencoded glyphs) won’t appear.
-- **Non-BMP is disabled by default** for stability. If you manually enable it, expect more tofu/bugs depending on Illustrator version.
-- This is not a full “glyphs panel replacement”. It’s a fast specimen/coverage tool, not an OT feature browser.
-- Very large fonts can still be slow (outline-based checks cost time). The progress palette exists for a reason.
+## Limitations
 
----
+- **Unicode only.** Glyphs without a code point (stylistic alternates,
+  swashes, other unencoded glyphs) are not shown. It is a coverage specimen,
+  not an OpenType feature browser.
+- **Basic Multilingual Plane only by default.** Code points above U+FFFF are
+  off for stability; they can be switched on in the code at your own risk.
+- **Large fonts take time.** The outline checks are not free; a progress window
+  shows how far the script has got.
+
+## Changes
+
+- **1.1** — renamed from SP All Write to Glyphsetter; the language module is
+  now `Glyphsetter Languages.jsx` (the old file name still works).
+- **1.0** — first release as SP All Write.
 
 ## License
 
-MIT License (or your repository’s license file, if different). Use, modify, and redistribute freely.
+[MIT](LICENSE). Use, change and share freely.
 
----
-
-## Credits
-
-Created by **Sasha Pavljenko** (SP Fonts Store)  
-AI assistance: **OpenAI (ChatGPT)**
+Made by **Sasha Pavljenko** — [pavljenko.ru](https://pavljenko.ru/blogs/scripts/glyphsetter).
+AI assistance: OpenAI (ChatGPT).

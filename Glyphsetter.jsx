@@ -1,7 +1,9 @@
 #target illustrator
 /*
 
-  SP All Write 1.0
+  Glyphsetter 1.1 (formerly SP All Write)
+  Builds a text object with every glyph the chosen font actually renders.
+  https://github.com/pavljenko/Glyphsetter · MIT License
 
 */
 
@@ -14,23 +16,24 @@
 // =====================================================
 function loadLanguageModule() {
   try {
-    // ВАРИАНТ 1: Ищем рядом с основным скриптом
-    var scriptFile = new File($.fileName);
-    var scriptFolder = scriptFile.parent;
-    var modulePath = scriptFolder + "/SP lang All Write.jsx";
-    var moduleFile = new File(modulePath);
-    
-    // ВАРИАНТ 2: Если не нашли, ищем в папке Scripts
-    if (!moduleFile.exists) {
-      var appFolder = Folder.appPackage;
-      var scriptsFolder = new Folder(appFolder + "/Presets/ru_RU/Scripts");
-      if (!scriptsFolder.exists) {
-        scriptsFolder = new Folder(appFolder + "/Presets/en_US/Scripts");
+    // Ищем модуль рядом с основным скриптом, затем в папке Scripts (ru_RU, en_US).
+    // Старое имя модуля (до переименования в Glyphsetter) тоже подходит.
+    var names = ["Glyphsetter Languages.jsx", "SP lang All Write.jsx"];
+    var appFolder = Folder.appPackage;
+    var folders = [
+      new File($.fileName).parent,
+      new Folder(appFolder + "/Presets/ru_RU/Scripts"),
+      new Folder(appFolder + "/Presets/en_US/Scripts")
+    ];
+    var moduleFile = null;
+    for (var i = 0; i < folders.length && !moduleFile; i++) {
+      for (var j = 0; j < names.length; j++) {
+        var candidate = new File(folders[i] + "/" + names[j]);
+        if (candidate.exists) { moduleFile = candidate; break; }
       }
-      moduleFile = new File(scriptsFolder + "/SP lang All Write.jsx");
     }
     
-    if (!moduleFile.exists) {
+    if (!moduleFile) {
       return null;
     }
     
@@ -872,7 +875,7 @@ var GOLDEN_PUNCT_STR =
   // =====================================================
   // DIALOG (with "Show languages")
   // =====================================================
-  var dlg = new Window("dialog", t("SP All Write", "SP All Write"));
+  var dlg = new Window("dialog", t("Глифсеттер", "Glyphsetter"));
   dlg.alignChildren = "fill";
 
   var bannerText = t("<3 Больше шрифтов", "<3 More Fonts") + " — pavljenko.ru\n_________________";
@@ -2078,8 +2081,8 @@ if (SHOW_LANGUAGES && LANGUAGE_MODULE_LOADED) {
   }
 } else if (SHOW_LANGUAGES && !LANGUAGE_MODULE_LOADED) {
   alert(t(
-    "Модуль определения языков не найден.\nПоместите 'SP lang All Write.jsx' рядом с основным скриптом.",
-    "Language detection module not found.\nPlace 'SP lang All Write.jsx' next to the main script."
+    "Модуль определения языков не найден.\nПоместите 'Glyphsetter Languages.jsx' рядом с основным скриптом.",
+    "Language detection module not found.\nPlace 'Glyphsetter Languages.jsx' next to the main script."
   ));
 }
 

@@ -1,5 +1,5 @@
-// AllGlyphs_LanguageModule.jsx
-// Language support detection module (case-insensitive requirements)
+// Glyphsetter Languages.jsx (formerly SP lang All Write.jsx)
+// Language support detection module for Glyphsetter (case-insensitive requirements)
 // Version: 2026-01-28
 
 (function () {
